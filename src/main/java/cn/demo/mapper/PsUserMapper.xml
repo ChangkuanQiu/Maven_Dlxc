@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.demo.mapper.PsUserMapper">
+
+<!--column是查出来的列 如果有取别名 要和别名一致 propety要和实体类的属性保持一致-->
+    <resultMap id="all" type="cn.demo.pojo.PsUser">
+        <id column="id" property="id"/>
+        <result column="usercode" property="usercode"/>
+        <result column="username" property="username"/>
+        <result column="userpassword" property="userpassword"/>
+        <result column="sex" property="sex"/>
+        <result column="age" property="age"/>
+        <result column="entrydate" property="entrydate"/>
+        <result column="dimissiondate" property="dimissiondate"/>
+        <result column="phonetel" property="phonetel"/>
+        <result column="email" property="email"/>
+        <result column="creationtime" property="creationtime"/>
+        <result column="lastlogintime" property="lastlogintime"/>
+        <result column="createdby" property="createdby"/>
+        <result column="rlastupdatetime" property="lastupdatetime"/>
+        <result column="userstatus" property="userstatus"/>
+        <result column="roleid" property="roleid"/>
+    <association property="PsRole" javaType="cn.demo.pojo.PsRole">
+        <id column="rid" property="id"/>
+        <result column="rolename" property="rolename"/>
+        <result column="rcreationtime" property="creationtime"/>
+        <result column="rcreatedby" property="createdby"/>
+        <result column="rlastupdatetime" property="lastupdatetime"/>
+        <result column="risstart" property="isstart"/>
+    </association>
+    </resultMap>
+
+    <resultMap id="allcode" type="cn.demo.pojo.PsRole">
+        <id column="rid" property="id"/>
+        <result column="rolename" property="rolename"/>
+        <result column="rcreationtime" property="creationtime"/>
+        <result column="rcreatedby" property="createdby"/>
+        <result column="rlastupdatetime" property="lastupdatetime"/>
+        <result column="risstart" property="isstart"/>
+    <collection property="psRolePremissions"  ofType="cn.demo.pojo.PsRolePremission">
+        <id column="id" property="id"/>
+        <result column="roleid" property="roleid"/>
+        <result column="functioncode" property="functioncode"/>
+        <result column="creationtime" property="creationtime"/>
+        <result column="createdby" property="createdby"/>
+        <result column="lastupdatetime" property="lastupdatetime"/>
+        <result column="isstart" property="isstart"/>
+    </collection>
+    </resultMap>
+<!--登录-->
+    <select id="login" parameterType="String" resultMap="all">
+    select u.*,r.id rid,r.rolename,r.creationtime rcreationtime,r.lastupdatetime rlastupdatetime,r.isstart risstart from PS_USer u INNER JOIN ps_role r on
+u.roleId=r.id  where userCode=#{0} and userpassword=#{1}
+    </select>
+<!--获取权限code-->
+    <select id="findFunctioncode"  parameterType="Integer" resultMap="allcode">
+        select r.id rid,r.rolename,r.creationtime rcreationtime,r.lastupdatetime rlastupdatetime,r.isstart risstart, p.* from ps_role r  INNER JOIN ps_role_premission p on
+p.roleId=r.id where r.id=#{rid}
+    </select>
+<!--    获取权限-->
+    <select id="getQx" parameterType="String" resultType="PsFunction" >
+
+    </select>
+<!--    查找所有用户数据放入Redis缓存中-->
+    <select id="getUserList" resultMap="all">
+        select u.*,r.id rid,r.rolename,r.creationtime rcreationtime,r.lastupdatetime rlastupdatetime,r.isstart risstart from PS_USer u INNER JOIN ps_role r on
+u.roleId=r.id
+    </select>
+<!--    //查找所有的巡检员-->
+    <select id="getUserxj"  parameterType="Integer" resultType="cn.demo.pojo.PsUser">
+select u.* from PS_USer u INNER JOIN ps_role r on u.roleId=r.id  where r.rolename =('巡查任务管理员')  limit #{0},#{1}
+    </select>
+</mapper>
+

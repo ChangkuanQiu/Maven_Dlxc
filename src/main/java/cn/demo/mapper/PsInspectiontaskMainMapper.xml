@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.demo.mapper.PsInspectiontaskMainMapper">
+
+
+
+    <!--查询单个-->
+    <select id="queryById" parameterType="String" resultType="PsInspectiontaskMain">
+        select * from ps_inspectiontask_main where id = #{0}
+    </select>
+
+    <!--查询指定行数据-->
+    <select id="queryAllByLimit" resultType="PsInspectiontaskMain">
+        select * from ps_inspectiontask_main
+        limit #{offset}, #{limit}
+    </select>
+
+    <!--查询所有-->
+    <select id="queryAll" resultType="PsInspectiontaskMain">
+        select  * from ps_inspectiontask_main
+    </select>
+
+    <!--新增所有列-->
+    <insert id="insert"  parameterType="PsInspectiontaskMain">
+        insert into ps_inspectiontask_main(inspectionTaskCode, inspectionTaskName, lineId, lineCode, lineName, startPole, startPoleCode, endPole, endPoleCode, issuedByCode, issuedByName, issuedTime, taskStatus, taskStatusName, finishTime, common, creationTime, createdBy)
+        values (#{inspectiontaskcode}, #{inspectiontaskname}, #{lineid}, #{linecode}, #{linename}, #{startpole}, #{startpolecode}, #{endpole}, #{endpolecode}, #{issuedbycode}, #{issuedbyname}, #{issuedtime}, #{taskstatus}, #{taskstatusname}, #{finishtime}, #{common}, #{creationtime}, #{createdby})
+    </insert>
+
+    <!--通过主键修改数据-->
+    <update id="updateMain" parameterType="PsInspectiontaskMain">
+        update ps_inspectiontask_main
+        <set>
+            <if test="inspectiontaskcode != null and inspectiontaskcode != ''">
+                inspectionTaskCode = #{inspectiontaskcode},
+            </if>
+            <if test="inspectiontaskname != null and inspectiontaskname != ''">
+                inspectionTaskName = #{inspectiontaskname},
+            </if>
+            <if test="lineid != null">
+                lineId = #{lineid},
+            </if>
+            <if test="linecode != null and linecode != ''">
+                lineCode = #{linecode},
+            </if>
+            <if test="linename != null and linename != ''">
+                lineName = #{linename},
+            </if>
+            <if test="startpole != null">
+                startPole = #{startpole},
+            </if>
+            <if test="startpolecode != null and startpolecode != ''">
+                startPoleCode = #{startpolecode},
+            </if>
+            <if test="endpole != null">
+                endPole = #{endpole},
+            </if>
+            <if test="endpolecode != null and endpolecode != ''">
+                endPoleCode = #{endpolecode},
+            </if>
+            <if test="issuedbycode != null and issuedbycode != ''">
+                issuedByCode = #{issuedbycode},
+            </if>
+            <if test="issuedbyname != null and issuedbyname != ''">
+                issuedByName = #{issuedbyname},
+            </if>
+            <if test="issuedtime != null">
+                issuedTime = #{issuedtime},
+            </if>
+            <if test="taskstatus != null">
+                taskStatus = #{taskstatus},
+            </if>
+            <if test="taskstatusname != null and taskstatusname != ''">
+                taskStatusName = #{taskstatusname},
+            </if>
+            <if test="finishtime != null">
+                finishTime = #{finishtime},
+            </if>
+            <if test="common != null and common != ''">
+                common = #{common},
+            </if>
+            <if test="creationtime != null">
+                creationTime = #{creationtime},
+            </if>
+            <if test="iscancel != null">
+                isCancel = #{iscancel},
+            </if>
+            <if test="createdby != null and createdby != ''">
+                createdBy = #{createdby},
+            </if>
+            <if test="lastupdatetime != null">
+                lastUpdateTime = #{lastupdatetime},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="deleteById" parameterType="String">
+        delete from ps_inspectiontask_main where id in (#{0})
+    </delete>
+<!--查询总条数-->
+    <select id="getMainCount" resultType="Integer">
+select count(0) from ps_inspectiontask_main
+    </select>
+<!--任务展示-->
+<!--    <select id="queryFy" parameterType="Integer" resultType="PsInspectiontaskMain">-->
+<!-- select * from ps_inspectiontask_main  limit #{0},#{1}-->
+<!--    </select>-->
+    <resultMap id="fyall" type="cn.demo.pojo.PsInspectiontaskMain">
+        <id column="id" property="id"/>
+        <result column="inspectionTaskCode" property="inspectiontaskcode"/>
+        <result column="inspectionTaskName" property="inspectiontaskname"/>
+        <result column="lineId" property="lineid"/>
+        <result column="lineCode" property="linecode"/>
+        <result column="lineName" property="linename"/>
+        <result column="startPole" property="startpole"/>
+        <result column="startPoleCode" property="startpolecode"/>
+        <result column="endPole" property="endpole"/>
+        <result column="endPoleCode" property="endpolecode"/>
+        <result column="issuedByCode" property="issuedbycode"/>
+        <result column="issuedByName" property="issuedbyname"/>
+        <result column="issuedTime" property="issuedtime"/>
+        <result column="taskStatus" property="taskstatus"/>
+        <result column="taskStatusName" property="taskstatusname"/>
+        <result column="finishTime" property="finishtime"/>
+        <result column="common" property="common"/>
+        <result column="creationTime" property="creationtime"/>
+        <result column="isCancel" property="iscancel"/>
+        <result column="createdBy" property="createdby"/>
+        <result column="lastUpdateTime" property="lastupdatetime"/>
+        <association property="psInspectorDetail" javaType="cn.demo.pojo.PsInspectorDetail">
+            <id column="did" property="id"/>
+            <result column="dtsdkid" property="taskid"/>
+            <result column="dcode" property="inspectorcode"/>
+            <result column="dname" property="inspectorname"/>
+            <result column="dtime" property="creationtime"/>
+            <result column="dcby" property="createdby"/>
+            <result column="duptime" property="lastupdatetime"/>
+        </association>
+    </resultMap>
+<!--    分页查询-->
+    <select id="queryFy" resultMap="fyall">
+        SELECT m.*,d.id did,d.taskId dtsdkid,d.inspectorCode dcode,d.inspectorName dname,d.creationTime dtime,d.createdBy dcby,d.lastUpdateTime duptime FROM ps_inspector_detail d right JOIN ps_inspectiontask_main m on
+d.taskId=m.id  limit #{0},#{1}
+    </select>
+    <resultMap id="fya" type="cn.demo.pojo.PsInspectiontaskMain">
+        <id column="id" property="id"/>
+        <result column="inspectionTaskCode" property="inspectiontaskcode"/>
+        <result column="inspectionTaskName" property="inspectiontaskname"/>
+        <result column="lineId" property="lineid"/>
+        <result column="lineCode" property="linecode"/>
+        <result column="lineName" property="linename"/>
+        <result column="startPole" property="startpole"/>
+        <result column="startPoleCode" property="startpolecode"/>
+        <result column="endPole" property="endpole"/>
+        <result column="endPoleCode" property="endpolecode"/>
+        <result column="issuedByCode" property="issuedbycode"/>
+        <result column="issuedByName" property="issuedbyname"/>
+        <result column="issuedTime" property="issuedtime"/>
+        <result column="taskStatus" property="taskstatus"/>
+        <result column="taskStatusName" property="taskstatusname"/>
+        <result column="finishTime" property="finishtime"/>
+        <result column="common" property="common"/>
+        <result column="creationTime" property="creationtime"/>
+        <result column="isCancel" property="iscancel"/>
+        <result column="createdBy" property="createdby"/>
+        <result column="lastUpdateTime" property="lastupdatetime"/>
+        <association property="psInspectorDetail" javaType="cn.demo.pojo.PsInspectorDetail">
+            <id column="did" property="id"/>
+            <result column="dtsdkid" property="taskid"/>
+            <result column="dcode" property="inspectorcode"/>
+            <result column="dname" property="inspectorname"/>
+            <result column="dtime" property="creationtime"/>
+            <result column="dcby" property="createdby"/>
+            <result column="duptime" property="lastupdatetime"/>
+        </association>
+    </resultMap>
+    <select id="queryFy2" resultMap="fya">
+        SELECT m.*,d.id did,d.taskId dtsdkid,d.inspectorCode dcode,d.inspectorName dname,d.creationTime dtime,d.createdBy dcby,d.lastUpdateTime duptime FROM ps_inspector_detail d right JOIN ps_inspectiontask_main m on
+        d.taskId=m.id where m.taskStatusName != '待分配'  limit #{0},#{1}
+    </select>
+
+        <resultMap id="Xq" type="cn.demo.pojo.PsInspectiontaskMain">
+            <id column="id" property="id"/>
+            <result column="inspectionTaskCode" property="inspectiontaskcode"/>
+            <result column="inspectionTaskName" property="inspectiontaskname"/>
+            <result column="lineId" property="lineid"/>
+            <result column="lineCode" property="linecode"/>
+            <result column="lineName" property="linename"/>
+            <result column="startPole" property="startpole"/>
+            <result column="startPoleCode" property="startpolecode"/>
+            <result column="endPole" property="endpole"/>
+            <result column="endPoleCode" property="endpolecode"/>
+            <result column="issuedByCode" property="issuedbycode"/>
+            <result column="issuedByName" property="issuedbyname"/>
+            <result column="issuedTime" property="issuedtime"/>
+            <result column="taskStatus" property="taskstatus"/>
+            <result column="taskStatusName" property="taskstatusname"/>
+            <result column="finishTime" property="finishtime"/>
+            <result column="common" property="common"/>
+            <result column="creationTime" property="creationtime"/>
+            <result column="createdBy" property="createdby"/>
+            <result column="lastUpdateTime" property="lastupdatetime"/>
+            <association property="psInspectiontaskDetail" javaType="cn.demo.pojo.PsInspectiontaskDetail">
+                <id column="did" property="id"/>
+                <result column="dtaskid" property="taskid"/>
+                <result column="dpoleid" property="poleid"/>
+                <result column="dpolecode" property="polecode"/>
+                <result column="dlinecode" property="linecode"/>
+                <result column="dlinename" property="linename"/>
+                <result column="disbug" property="isbug"/>
+                <result column="drate" property="intactrate"/>
+                <result column="dbugleve" property="buglevel"/>
+                <result column="dbugname" property="buglevelname"/>
+                <result column="dbugtype" property="bugtype"/>
+                <result column="dbugtypename" property="bugtypename"/>
+                <result column="dbugdesc" property="bugdesc"/>
+                <result column="dscode" property="discoverercode"/>
+                <result column="dsname" property="discoverername"/>
+                <result column="dstime" property="discovertime"/>
+                <result column="dsolve" property="issolve"/>
+                <result column="dinspecttime" property="inspecttime"/>
+                <result column="dcreatetime" property="creationtime"/>
+                <result column="dcreateby" property="createdby"/>
+                <result column="duptime" property="lastupdatetime"/>
+            </association>
+
+        </resultMap>
+<!--    查看任务详情-->
+<select id="findeXQ" parameterType="String" resultMap="Xq">
+select m.*,d.id did,d.taskId dtaskid,d.poleId dpoleid,d.poleCode dpolecode,d.lineCode dlinecode,d.lineName dlinename,d.isBug disbug,d.intactRate drate,d.bugLevel dbugleve,d.bugLevelName dbugname,d.bugType dbugtype,d.bugTypeName dbugtypename,d.bugDesc dbugdesc,d.discovererCode dscode,d.discovererName dsname,d.discoverTime dstime ,d.isSolve dsolve ,d.inspectTime dinspecttime,d.creationTime dcreatetime,d.createdBy dcreateby,d.lastUpdateTime duptime from ps_inspectiontask_detail d right JOIN  ps_inspectiontask_main m
+on m.id=d.taskId  where m.id=#{id}
+</select>
+<!--分配任务-->
+    <insert id="fp" parameterType="cn.demo.pojo.PsInspectorDetail">
+        insert into ps_inspector_detail(taskId,inspectorCode,inspectorName,creationTime)
+        values(#{taskid},#{inspectorcode},#{inspectorname},current_timestamp)
+    </insert>
+
+    <!--回执录入-->
+    <insert id="hzlr" parameterType="cn.demo.pojo.PsInspectiontaskDetail">
+        insert into ps_inspectiontask_detail
+                 (taskId,poleId, poleCode, lineCode, lineName,intactRate, bugLevel, bugLevelName, bugType, bugTypeName, bugDesc, discovererCode, discovererName, discoverTime,  inspectTime, creationTime, createdBy)
+values (#{taskid},#{poleid}, #{polecode}, #{linecode}, #{linename}, #{intactrate}, #{buglevel}, #{buglevelname}, #{bugtype}, #{bugtypename}, #{bugdesc}, #{discoverercode}, #{discoverername}, #{discovertime},  #{inspecttime}, #{creationtime}, #{createdby})
+    </insert>
+
+<!--    缺陷查询-->
+    <select id="getqx" parameterType="Integer" resultType="cn.demo.pojo.buglists">
+     SELECT * from buglists limit #{0},#{1}
+    </select>
+    <resultMap id="qxresult" type="cn.demo.pojo.PsInspectiontaskDetail">
+        <id column="id" property="id"/>
+        <result column="taskid" property="taskid"/>
+        <result column="dpoleid" property="poleid"/>
+        <result column="polecode" property="polecode"/>
+        <result column="linecode" property="linecode"/>
+        <result column="linename" property="linename"/>
+        <result column="isbug" property="isbug"/>
+        <result column="intactrate" property="intactrate"/>
+        <result column="buglevel" property="buglevel"/>
+        <result column="buglevelname" property="buglevelname"/>
+        <result column="bugtype" property="bugtype"/>
+        <result column="bugtypename" property="bugtypename"/>
+        <result column="bugdesc" property="bugdesc"/>
+        <result column="discoverercode" property="discoverercode"/>
+        <result column="discoverername" property="discoverername"/>
+        <result column="discovertime" property="discovertime"/>
+        <result column="issolve" property="issolve"/>
+        <result column="inspecttime" property="inspecttime"/>
+        <result column="creationtime" property="creationtime"/>
+        <result column="createdby" property="createdby"/>
+        <result column="lastupdatetime" property="lastupdatetime"/>
+    </resultMap>
+<!--    缺陷记录数-->
+    <select id="getqxCount" resultType="Integer">
+        select count(0) from buglists
+    </select>
+</mapper>

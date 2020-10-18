@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+	http://www.springframework.org/schema/aop
+	http://www.springframework.org/schema/aop/spring-aop-4.2.xsd
+	http://www.springframework.org/schema/context
+	http://www.springframework.org/schema/context/spring-context-4.2.xsd
+	http://www.springframework.org/schema/tx
+	http://www.springframework.org/schema/tx/spring-tx-4.2.xsd ">
+
+    <!-- 自动扫描Spring注解配置 -->
+    <context:component-scan base-package="cn.demo.service.impl,cn.demo.controller,cn.demo.shior,cn.demo.redis" />
+
+    <!-- 自动加载属性配置文件 -->
+    <context:property-placeholder location="classpath:jdbc.properties" />
+
+    <!-- 配置数据源：方法一，使用C3P0方式（推荐） -->
+    	<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+    		  destroy-method="close"
+    		  p:driverClass="${jdbc.driver}"
+    		  p:jdbcUrl="${jdbc.url}"
+    		  p:user="${jdbc.username}"
+    		  p:password="${jdbc.password}" />
+
+
+    <!-- 配置数据源  DBCP方式-->
+<!--    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"-->
+<!--          destroy-method="close"-->
+<!--          p:driverClassName="${jdbc.driver}"-->
+<!--          p:url="${jdbc.url}"-->
+<!--          p:username="${jdbc.username}"-->
+<!--          p:password="${jdbc.password}" />-->
+
+    <!-- 配置sqlsessionFactory -->
+    <bean id="sqlsessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="typeAliasesPackage" value="cn.demo.pojo"/>
+        <property name="mapperLocations" value="classpath*:/cn/demo/mapper/*.xml" />
+        <property name="configuration">
+            <bean class="org.apache.ibatis.session.Configuration">
+                <property name="logImpl" value="org.apache.ibatis.logging.stdout.StdOutImpl"/>
+            </bean>
+        </property>
+    </bean>
+
+    <!-- 自动生产Mapper接口的bean -->
+    <bean id="mapperScanner" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="cn.demo.mapper"/>
+    </bean>
+
+    <!-- 定义事务管理器 -->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <!-- <tx:annotation-driven transaction-manager="transactionManager" /> -->
+
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="insert*" propagation="REQUIRED" />
+            <tx:method name="update*" propagation="REQUIRED" />
+            <tx:method name="edit*" propagation="REQUIRED" />
+            <tx:method name="save*" propagation="REQUIRED" />
+            <tx:method name="add*" propagation="REQUIRED" />
+            <tx:method name="new*" propagation="REQUIRED" />
+            <tx:method name="set*" propagation="REQUIRED" />
+            <tx:method name="remove*" propagation="REQUIRED" />
+            <tx:method name="del*" propagation="REQUIRED" />
+            <tx:method name="change*" propagation="REQUIRED" />
+            <tx:method name="get*" propagation="REQUIRED" read-only="true" />
+            <tx:method name="fin*" propagation="REQUIRED" read-only="true" />
+            <tx:method name="load*" propagation="REQUIRED" read-only="true" />
+            <tx:method name="search*" propagation="REQUIRED" read-only="true" />
+            <tx:method name="*" propagation="REQUIRED" read-only="true" />
+        </tx:attributes>
+    </tx:advice>
+
+    <aop:config>
+        <aop:pointcut id="mypointcut" expression="execution(* cn.demo.*.service..*.*(..))" />
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="mypointcut" />
+    </aop:config>
+
+    <!-- 配置shior的身份权限验证 -->
+    <!-- 配置shior的realm对象 -->
+    <bean id="myShiroRealm" class="cn.demo.shior.MyShiroRealm"></bean>
+    <!-- 配置shior的安全管理器 -->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="myShiroRealm"></property>
+    </bean>
+    <!-- 配置shior的过滤器 -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!-- 配置当前用户的安全管理器 -->
+        <property name="securityManager" ref="securityManager"></property>
+        <!-- 配置要拦截的登录路径 -->
+        <property name="loginUrl" value="/login.jsp"></property>
+        <!--   配置成功的页面     -->
+        <property name="successUrl" value="/user.jsp"></property>
+        <!-- 配置没有权限时跳转的路径 -->
+<!--        <property name="unauthorizedUrl" value="/notqx.jsp"></property>-->
+        <!-- 配置过滤规则 -->
+        <property name="filterChainDefinitions">
+            <value>
+                <!--anon:不拦截，放行-->
+                /admin/index.jsp=anon
+                /log//log=anon
+                <!-- 配置注销登录时所有session失效 -->
+                /shiro/logout=logout
+                <!--配置必须认证后才能使用  -->
+                /**=authc
+            </value>
+        </property>
+    </bean>
+
+<!--Redis配置文件-->
+    <!-- jedis 配置 -->
+    <bean id="poolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxIdle" value="${redis.maxIdle}" />
+        <property name="minIdle" value="${redis.minIdle}" />
+        <property name="maxWaitMillis" value="${redis.maxWait}" />
+        <property name="testOnBorrow" value="${redis.testOnBorrow}" />
+    </bean>
+    <!-- redis服务器中心 -->
+    <bean id="connectionFactory"
+          class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <property name="poolConfig" ref="poolConfig" />
+        <property name="port" value="${redis.port}" />
+        <property name="hostName" value="${redis.host}" />
+        <property name="password" value="${redis.pass}" />
+        <property name="timeout" value="${redis.timeout}" />
+    </bean>
+    <!-- redis操作模板，面向对象的模板 -->
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+        <property name="connectionFactory" ref="connectionFactory" />
+        <!-- 如果不配置Serializer，那么存储的时候只能使用String，如果用对象类型存储，那么会提示错误 -->
+        <property name="keySerializer">
+            <bean class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+        </property>
+        <property name="valueSerializer">
+            <bean class="org.springframework.data.redis.serializer.JdkSerializationRedisSerializer" />
+        </property>
+    </bean>
+
+</beans>
